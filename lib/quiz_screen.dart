@@ -151,13 +151,13 @@ class QuizScreenState extends State<QuizScreen> {
             const SizedBox(height: 20),
             Center(
               child: Text(
-                'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
             ),
             const SizedBox(height: 20),
             Container(
@@ -215,11 +215,13 @@ class QuizScreenState extends State<QuizScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              option,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
+                            Expanded(
+                              child: Text(
+                                option,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
                             if (icon != null)

@@ -46,7 +46,7 @@ class ResultScreen extends StatelessWidget {
   }
 
   Future<void> _saveResult(int score, int totalQuestions) async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('score', score);
     await prefs.setInt('totalQuestions', totalQuestions);
   }
