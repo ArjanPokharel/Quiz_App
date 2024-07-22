@@ -29,7 +29,13 @@ class LoginScreenState extends State<LoginScreen> {
     List<String> results = prefs.getStringList('quizResults') ?? [];
     setState(() {
       if (results.isNotEmpty) {
-        _previousResults = results.join('\n');
+        // Get the last 5 results
+        final last5Results = results.length > 5 
+            ? results.sublist(results.length - 5) 
+            : results;
+        _previousResults = last5Results.isNotEmpty
+            ? last5Results.join('\n')
+            : 'No previous results found';
       } else {
         _previousResults = 'No previous results found';
       }

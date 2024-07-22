@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,27 +27,50 @@ class QuizScreenState extends State<QuizScreen> {
     _fetchQuizData();
   }
 
+  // Initialize the logger
+  var logger = Logger();
+
   Future<void> _fetchQuizData() async {
-    final response = await http.get(Uri.parse('https://the-trivia-api.com/v2/questions'));
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        _questions = data.map((question) {
-          final correctAnswer = question['correctAnswer'];
-          final options = [
-            ...question['incorrectAnswers'],
-            correctAnswer,
-          ]..shuffle();
-          return {
-            'question': question['question'],
-            'correctAnswer': correctAnswer,
-            'options': options,
-            'selectedOption': null,
-          };
-        }).toList();
-      });
-    } else {
-      throw Exception('Failed to load quiz data');
+    try {
+      final response = await http.get(Uri.parse('https://the-trivia-api.com/v2/questions'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+
+        // Log the response data
+        logger.d('Response data: $data');
+
+        setState(() {
+          _questions = data.map((question) {
+            // Log each question to inspect its structure
+            logger.d('Question: $question');
+
+            final correctAnswer = question['correctAnswer'];
+            final options = [
+              ...question['incorrectAnswers'],
+              correctAnswer,
+            ]..shuffle();
+
+            // Check the structure of the question to avoid issues
+            final questionText = question['question'] is String
+                ? question['question']
+                : (question['question'] is Map
+                    ? question['question']['text']
+                    : 'Unknown question format');
+
+            return {
+              'question': questionText,
+              'correctAnswer': correctAnswer,
+              'options': options,
+              'selectedOption': null,
+            };
+          }).toList();
+        });
+      } else {
+        throw Exception('Failed to load quiz data: ${response.statusCode}');
+      }
+    } catch (error) {
+      logger.e('Error fetching quiz data: $error');
     }
   }
 
@@ -94,7 +118,16 @@ class QuizScreenState extends State<QuizScreen> {
   }
 
   void _onTimerEnd() {
-    _nextQuestionOrResult();
+    _saveQuizResult(_score, _questions.length).then((_) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => ResultScreen(
+            score: _score,
+            totalQuestions: _questions.length,
+          ),
+        ),
+      );
+    });
   }
 
   void _onTick() {
@@ -151,13 +184,13 @@ class QuizScreenState extends State<QuizScreen> {
             const SizedBox(height: 20),
             Center(
               child: Text(
-                  'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
+              ),
             ),
             const SizedBox(height: 20),
             Container(
@@ -178,7 +211,7 @@ class QuizScreenState extends State<QuizScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    question['question']['text'],
+                    question['question'],
                     style: const TextStyle(fontSize: 24, color: Colors.black),
                   ),
                   const SizedBox(height: 20),

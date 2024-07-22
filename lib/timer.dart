@@ -52,39 +52,30 @@ class QuizTimerState extends State<QuizTimer> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(
-            '',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(
-              children: [
-                Center(
-                  child: CircularProgressIndicator(
-                    value: _timeRemaining / widget.duration,
-                    backgroundColor: Colors.grey[200],
-                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF194F46)),
-                  ),
+    return Column(
+      children: [
+        SizedBox(
+          width: 40,
+          height: 40,
+          child: Stack(
+            children: [
+              Center(
+                child: CircularProgressIndicator(
+                  value: _timeRemaining / widget.duration,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF194F46)),
                 ),
-                Center(
-                  child: Text(
-                    '$_timeRemaining',
-                    style: widget.textStyle,
-                  ),
+              ),
+              Center(
+                child: Text(
+                  '$_timeRemaining',
+                  style: widget.textStyle,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
