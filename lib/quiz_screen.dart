@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'quiz_ui.dart';
 import 'result_screen.dart';
-import 'timer.dart';
+import 'package:logging/logging.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -15,6 +14,8 @@ class QuizScreen extends StatefulWidget {
 }
 
 class QuizScreenState extends State<QuizScreen> {
+  final Logger _logger = Logger('QuizScreen');
+
   List<Map<String, dynamic>> _questions = [];
   int _currentQuestionIndex = 0;
   bool _isOptionSelected = false;
@@ -24,55 +25,57 @@ class QuizScreenState extends State<QuizScreen> {
   @override
   void initState() {
     super.initState();
+    _setupLogging();
     _fetchQuizData();
   }
 
-  // Initialize the logger
-  var logger = Logger();
-
-  Future<void> _fetchQuizData() async {
-    try {
-      final response = await http.get(Uri.parse('https://the-trivia-api.com/v2/questions'));
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-
-        // Log the response data
-        logger.d('Response data: $data');
-
-        setState(() {
-          _questions = data.map((question) {
-            // Log each question to inspect its structure
-            logger.d('Question: $question');
-
-            final correctAnswer = question['correctAnswer'];
-            final options = [
-              ...question['incorrectAnswers'],
-              correctAnswer,
-            ]..shuffle();
-
-            // Check the structure of the question to avoid issues
-            final questionText = question['question'] is String
-                ? question['question']
-                : (question['question'] is Map
-                    ? question['question']['text']
-                    : 'Unknown question format');
-
-            return {
-              'question': questionText,
-              'correctAnswer': correctAnswer,
-              'options': options,
-              'selectedOption': null,
-            };
-          }).toList();
-        });
-      } else {
-        throw Exception('Failed to load quiz data: ${response.statusCode}');
-      }
-    } catch (error) {
-      logger.e('Error fetching quiz data: $error');
-    }
+  void _setupLogging() {
+    Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((record) {
+      _logger.info('${record.level.name}: ${record.time}: ${record.message}');
+    });
   }
+
+Future<void> _fetchQuizData() async {
+  try {
+    final response = await http.get(Uri.parse('https://the-trivia-api.com/v2/questions'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+
+      _logger.fine('Response data: $data');
+
+      setState(() {
+        _questions = data.map((dynamic item) {
+          final question = item as Map<String, dynamic>;
+
+          _logger.fine('Question: $question');
+
+          final correctAnswer = question['correctAnswer'] as String;
+          final options = [
+            ...List<String>.from(question['incorrectAnswers'] as List<dynamic>),
+            correctAnswer,
+          ]..shuffle();
+
+          final questionText = question['question'] is String
+              ? question['question'] as String
+              : (question['question'] is Map ? question['question']['text'] as String : 'Unknown question format');
+
+          return {
+            'question': questionText,
+            'correctAnswer': correctAnswer,
+            'options': options,
+            'selectedOption': null,
+          };
+        }).toList();
+      });
+    } else {
+      throw Exception('Failed to load quiz data: ${response.statusCode}');
+    }
+  } catch (error) {
+    _logger.severe('Error fetching quiz data: $error');
+  }
+}
 
   Future<void> _saveQuizResult(int score, int totalQuestions) async {
     final prefs = await SharedPreferences.getInstance();
@@ -149,145 +152,18 @@ class QuizScreenState extends State<QuizScreen> {
     final correctAnswer = question['correctAnswer'];
     final options = question['options'];
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F2F6),
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: const Text(
-          'Quiz App',
-          style: TextStyle(color: Colors.black),
-        ),
-        backgroundColor: const Color(0xFFF1F2F6),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: QuizTimer(
-                duration: 60,
-                onTimerEnd: _onTimerEnd,
-                onTick: _onTick,
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF194F46), // Timer text color
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: Text(
-                'Question ${_currentQuestionIndex + 1} / ${_questions.length}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 1,
-                    blurRadius: 3,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    question['question'],
-                    style: const TextStyle(fontSize: 24, color: Colors.black),
-                  ),
-                  const SizedBox(height: 20),
-                  ...options.map((option) {
-                    Color optionColor;
-                    IconData? icon;
-
-                    if (_isOptionSelected) {
-                      if (option == _selectedOption) {
-                        optionColor = option == correctAnswer ? Colors.green : Colors.red;
-                        icon = option == correctAnswer ? Icons.check : Icons.close;
-                      } else if (option == correctAnswer) {
-                        optionColor = Colors.green;
-                        icon = Icons.check;
-                      } else {
-                        optionColor = Colors.white;
-                        icon = null;
-                      }
-                    } else {
-                      optionColor = Colors.white;
-                      icon = null;
-                    }
-
-                    return GestureDetector(
-                      onTap: () => _selectOption(option),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: optionColor,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                option,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            if (icon != null)
-                              Icon(
-                                icon,
-                                size: 24,
-                                color: optionColor == Colors.green ? Colors.green : Colors.red,
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                  const SizedBox(height: 20),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: _isOptionSelected ? _nextQuestionOrResult : null,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                        backgroundColor: const Color(0xFF194F46),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      child: const Text('Next', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    return QuizUI(
+      question: question['question'],
+      options: options,
+      isOptionSelected: _isOptionSelected,
+      selectedOption: _selectedOption,
+      correctAnswer: correctAnswer,
+      currentQuestionIndex: _currentQuestionIndex,
+      totalQuestions: _questions.length,
+      onSelectOption: _selectOption,
+      onNext: _nextQuestionOrResult,
+      onTimerEnd: _onTimerEnd,
+      onTick: _onTick,
     );
   }
 }

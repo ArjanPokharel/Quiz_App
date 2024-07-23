@@ -60,16 +60,22 @@ class QuizTimerState extends State<QuizTimer> {
           child: Stack(
             children: [
               Center(
-                child: CircularProgressIndicator(
-                  value: _timeRemaining / widget.duration,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF194F46)),
+                child: Transform.scale(
+                  scale: 2.0, // Increase this value to make the circle bigger
+                  child: CircularProgressIndicator(
+                    value: _timeRemaining / widget.duration,
+                    backgroundColor: Colors.grey[200],
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF194F46)),
+                  ),
                 ),
               ),
               Center(
-                child: Text(
-                  '$_timeRemaining',
-                  style: widget.textStyle,
+                child: Transform.scale(
+                  scale: 2.0, // Increase this value to make the text bigger
+                  child: Text(
+                    '$_timeRemaining',
+                    style: widget.textStyle,
+                  ),
                 ),
               ),
             ],

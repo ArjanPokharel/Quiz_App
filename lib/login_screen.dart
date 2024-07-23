@@ -46,103 +46,140 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF497B78),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.white,
-                child: Text(
-                  'QUIZ',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'QUIZ',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 50),
-              TextField(
-                controller: _nameController,
-                style: const TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: 'Enter your name',
-                  hintStyle: TextStyle(
-                    color: Colors.black.withOpacity(0.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(color: Colors.black),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF7C942),
-                  padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                onPressed: () {
-                  String name = _nameController.text.trim();
-                  if (name.isNotEmpty) {
-                    Navigator.pushNamed(
-                      context,
-                      '/quiz',
-                      arguments: name,
-                    );
-                  }
-                },
-                child: const Text(
-                  'Start',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6AD7A5),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Previous Quiz Results'),
-                      content: Text(_previousResults),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('OK'),
+                  const SizedBox(height: 50),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Text widget added above the TextField
+                        const Text(
+                          'Enter your name',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8), // Add some spacing
+                        TextField(
+                          controller: _nameController,
+                          style: const TextStyle(color: Colors.white), // Set text color to white
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFF497B78), // Match background color
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                              borderSide: const BorderSide(color: Colors.white), // White border color
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                              borderSide: const BorderSide(color: Colors.white), // White border color
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                              borderSide: const BorderSide(color: Colors.white), // White border color
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0), // Added horizontal padding
+                            // hintText: '',
+                            // hintStyle: const TextStyle(color: Colors.white70), // Hint text color
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-                child: const Text(
-                  'View Quiz Result',
-                  style: TextStyle(color: Colors.white),
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF7C942),
+                    padding: const EdgeInsets.symmetric(horizontal: 160, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    String name = _nameController.text.trim();
+                    if (name.isNotEmpty) {
+                      Navigator.pushNamed(
+                        context,
+                        '/quiz',
+                        arguments: name,
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Start',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6AD7A5),
+                    padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Previous Quiz Results'),
+                        content: Text(_previousResults),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'View Quiz Result',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

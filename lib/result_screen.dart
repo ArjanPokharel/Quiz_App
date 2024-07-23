@@ -14,32 +14,36 @@ class ResultScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz Results'),
-        backgroundColor: const Color(0xFF194F46),
+        backgroundColor: const Color(0xFF497B78),
       ),
+      backgroundColor: const Color(0xFF497B78), // Changed background color to 0xFF497B78
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Quiz Completed!',
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Your score is $score / $totalQuestions',
-              style: const TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: DefaultTextStyle(
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), // Set default text color to white and bold
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Quiz Completed!',
+                style: TextStyle(fontSize: 24),
               ),
-              child: const Text('Back to Home'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Text(
+                'Your score is $score / $totalQuestions',
+                style: const TextStyle(fontSize: 20),
+              ),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: const Text('Back to Home'),
+              ),
+            ],
+          ),
         ),
       ),
     );
