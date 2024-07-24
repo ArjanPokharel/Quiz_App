@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'quiz_results_provider.dart';
 
 class ResultScreen extends StatelessWidget {
   final int score;
@@ -9,17 +10,20 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _saveResult(score, totalQuestions);
+    final quizResultsProvider = Provider.of<QuizResultsProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      quizResultsProvider.addResult('Score: $score / $totalQuestions');
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz Results'),
         backgroundColor: const Color(0xFF497B78),
       ),
-      backgroundColor: const Color(0xFF497B78), // Changed background color to 0xFF497B78
+      backgroundColor: const Color(0xFF497B78),
       body: Center(
         child: DefaultTextStyle(
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), // Set default text color to white and bold
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -35,7 +39,7 @@ class ResultScreen extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.of(context).pop(true);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -47,13 +51,5 @@ class ResultScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _saveResult(int score, int totalQuestions) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> results = prefs.getStringList('quizResults') ?? [];
-    String result = 'Score: $score / $totalQuestions';
-    results.add(result);
-    await prefs.setStringList('quizResults', results);
   }
 }
